@@ -6,12 +6,16 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.google.gson.JsonObject;
 import com.vise.log.ViseLog;
 import com.vise.netexpand.request.ApiGetRequest;
 import com.vise.netexpand.request.ApiPostRequest;
 import com.vise.snowdemo.R;
 import com.vise.snowdemo.api.AuthorService;
 import com.vise.snowdemo.base.BaseActivity;
+import com.vise.snowdemo.base.OrderData;
+import com.vise.snowdemo.bean.BaseEntity;
+import com.vise.snowdemo.bean.LoginData;
 import com.vise.snowdemo.mode.AuthorModel;
 import com.vise.xsnow.common.GsonUtil;
 import com.vise.xsnow.http.ViseHttp;
@@ -50,6 +54,8 @@ public class NetTestActivity extends BaseActivity {
     private Button mRequest_post_5;
     private Button mRequest_retrofit_1;
     private Button mRequest_retrofit_2;
+
+    private String token = "\"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOjIsImlzcyI6Imh0dHA6Ly80Ny4xMDYuMTk0LjIwNS9zdHUvbG9naW4iLCJpYXQiOjE1MzE1NjUyMjAsImV4cCI6MTUzMjE3MDAyMCwibmJmIjoxNTMxNTY1MjIwLCJqdGkiOiJpcTNzeHdhZUY2OEZ4UVd6In0.Ys5IexUqA57jXTTO6TDrep7fA13Hw-a0gk6UsrSuKrM";
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -179,17 +185,29 @@ public class NetTestActivity extends BaseActivity {
     }
 
     private void request_get_1() {
-        mShow_response_data.setText("");
-        ViseHttp.GET("getAuthor")
+        //mShow_response_data.setText("");
+        token = "Bearer " + token;
+        ViseHttp.GET("stu/my/order")
+                .addHeader("Authorization", token)
                 .tag("request_get_1")
-                .request(new ACallback<AuthorModel>() {
+                .request(new ACallback<BaseEntity<List<OrderData>>>() {
                     @Override
-                    public void onSuccess(AuthorModel authorModel) {
+                    public void onSuccess(BaseEntity<List<OrderData>> authorModel) {
                         ViseLog.i("request onSuccess!");
                         if (authorModel == null) {
                             return;
                         }
-                        mShow_response_data.setText(authorModel.toString());
+
+                        List<OrderData> orderList = authorModel.getData();
+
+                        int size = orderList.size();
+                        StringBuilder sb=new StringBuilder();
+                        for (int i = 0; i < size; i++) {
+                            sb.append(orderList.get(i).getName()+"\n");
+                        }
+
+
+                         mShow_response_data.setText(sb.toString());
                     }
 
                     @Override
@@ -434,22 +452,28 @@ public class NetTestActivity extends BaseActivity {
     }
 
     private void request_post_1() {
-        mShow_response_data.setText("");
-        ViseHttp.BASE(new ApiPostRequest("postAuthor").tag("request_post_1")).request(new ACallback<String>() {
-            @Override
-            public void onSuccess(String data) {
-                ViseLog.i("request onSuccess!");
-                if (data == null) {
-                    return;
-                }
-                mShow_response_data.setText(data);
-            }
+        // mShow_response_data.setText("");
+        ViseHttp.BASE(new ApiPostRequest("stu/login").tag("request_post_1"))
+                .addParam("username", "xiaoming")
+                .addParam("password", "1234567")
+                .request(new ACallback<LoginData>() {
+                    @Override
+                    public void onSuccess(LoginData data) {
+                        ViseLog.i("request onSuccess!");
+                        if (data == null) {
+                            return;
+                        }
+                        token = data.getToken();
+                        mShow_response_data.setText(token);
 
-            @Override
-            public void onFail(int errCode, String errMsg) {
-                ViseLog.e("request errorCode:" + errCode + ",errorMsg:" + errMsg);
-            }
-        });
+
+                    }
+
+                    @Override
+                    public void onFail(int errCode, String errMsg) {
+                        ViseLog.e("request errorCode:" + errCode + ",errorMsg:" + errMsg);
+                    }
+                });
     }
 
     private void request_post_2() {

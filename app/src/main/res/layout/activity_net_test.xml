@@ -131,6 +131,7 @@
                 android:id="@+id/show_response_data"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:text="nihao a "
                 android:padding="15dp"/>
         </LinearLayout>
     </ScrollView>

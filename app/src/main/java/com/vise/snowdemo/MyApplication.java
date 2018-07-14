@@ -37,7 +37,7 @@ public class MyApplication extends Application {
         ViseHttp.init(this);
         ViseHttp.CONFIG()
                 //配置请求主机地址
-                .baseUrl("http://192.168.1.105/")
+                .baseUrl("http://47.106.194.205/")
                 .setCookie(true)
                 //配置日志拦截器
                 .interceptor(new HttpLogInterceptor()
